@@ -11,13 +11,12 @@ import requests
 import pandas as pd
 import re
 import json
-import os
 
 # ==============================
 # OPENROUTER API CONFIG (DEEPSEEK)
 # ==============================
 # Ganti teks di bawah ini dengan API Key OpenRouter Anda!
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENROUTER_API_KEY = "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"
 
 # Menggunakan model DeepSeek R1 versi 8B
 MODEL_ID = "deepseek/deepseek-chat"
@@ -113,7 +112,7 @@ class PreferencePair(BaseModel):
 # LOAD DATASET EXCEL
 # ==============================
 
-DATASET_PATH = "preprocessing_semua_dokter_clean.xlsx"
+DATASET_PATH = r"C:\Users\riobu\Downloads\Halusinansi-LLM\medical-qa-system\preprocessing_semua_dokter_clean.xlsx"
 
 df = pd.read_excel(DATASET_PATH)
 
