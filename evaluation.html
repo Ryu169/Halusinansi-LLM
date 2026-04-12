@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Evaluation Dashboard</title>
+</head>
+<body style="font-family:sans-serif; padding:20px;">
+
+<h2>Dashboard Evaluasi Model</h2>
+
+<div id="stats"></div>
+
+<canvas id="chart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+fetch("http://127.0.0.1:8000/evaluation_stats")
+  .then(res => res.json())
+  .then(data => {
+
+    document.getElementById("stats").innerHTML = `
+      <p>Total Data: ${data.total}</p>
+      <p>Entailment (E): ${data.E}</p>
+      <p>Neutral (N): ${data.N}</p>
+      <p>Contradiction (C): ${data.C}</p>
+      <p>Rata-rata Entropy: ${data.avg_entropy}</p>
+    `
+
+    const ctx = document.getElementById('chart').getContext('2d')
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Entailment', 'Neutral', 'Contradiction'],
+        datasets: [{
+          label: 'Jumlah',
+          data: [data.E, data.N, data.C]
+        }]
+      }
+    })
+
+  })
+
+</script>
+
+</body>
+</html>

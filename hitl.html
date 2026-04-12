@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Human Evaluation Panel</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+.container{
+width:900px;
+margin:auto;
+margin-top:60px;
+padding:30px;
+background:#f5f5f5;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ccc;
+text-align:center;
+}
+
+th{
+background:#e8e8e8;
+}
+
+.answer-cell{
+text-align:left;
+max-width:400px;
+}
+
+button{
+padding:6px 12px;
+margin:3px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.correct{
+background:#2ecc71;
+color:white;
+}
+
+.incorrect{
+background:#e74c3c;
+color:white;
+}
+
+.refresh{
+margin-top:20px;
+padding:10px 20px;
+background:#3498db;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Human Evaluation Panel</h1>
+
+<p>⚠️ HITL lama dinonaktifkan. Gunakan sistem pairwise (DPO)</p>
+
+<table>
+
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+<th>Entropy</th>
+<th>Risk</th>
+<th>Evaluation</th>
+</tr>
+</thead>
+
+<tbody id="hitl-body">
+
+</tbody>
+
+</table>
+
+<button class="refresh" onclick="loadHITL()">Refresh Data</button>
+
+</div>
+
+<script src="hitl.js"></script>
+
+</body>
+
+</html>

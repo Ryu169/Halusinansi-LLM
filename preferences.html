@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preferences — Medical QA</title>
+<link rel="stylesheet" href="style.css">
+<style>
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  transition: border-color 0.2s, transform 0.15s;
+  animation: fadeUp 0.5s ease both;
+}
+
+.stat-tile:hover { transform: translateY(-2px); }
+
+.stat-tile .tile-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--text3);
+  margin-bottom: 8px;
+}
+
+.stat-tile .tile-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.stat-tile .tile-sub { font-size: 11px; color: var(--text3); }
+
+.tile-total { border-color: rgba(56,189,248,0.2); }
+.tile-total .tile-value { color: var(--accent); }
+.tile-dpo   { border-color: rgba(129,140,248,0.2); }
+.tile-dpo .tile-value   { color: var(--accent2); }
+.tile-e     { border-color: rgba(52,211,153,0.2); }
+.tile-e .tile-value     { color: var(--accent3); }
+.tile-n     { border-color: rgba(251,191,36,0.2); }
+.tile-n .tile-value     { color: var(--warn); }
+.tile-c     { border-color: rgba(248,113,113,0.2); }
+.tile-c .tile-value     { color: var(--danger); }
+
+/* ENC BAR */
+.enc-bar-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+
+.enc-bar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.enc-bar-header h3 {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--text3);
+}
+
+.enc-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.enc-legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.enc-legend span::before {
+  content: '';
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 2px;
+}
+
+.leg-e::before { background: var(--accent3); }
+.leg-n::before { background: var(--warn); }
+.leg-c::before { background: var(--danger); }
+
+.bar-track {
+  display: flex;
+  height: 30px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg2);
+  gap: 2px;
+}
+
+.bar-seg {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  transition: flex 1.2s cubic-bezier(.4,0,.2,1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bar-e { background: rgba(52,211,153,0.22); color: var(--accent3); border-radius: 6px 0 0 6px; }
+.bar-n { background: rgba(251,191,36,0.18); color: var(--warn); }
+.bar-c { background: rgba(248,113,113,0.18); color: var(--danger); border-radius: 0 6px 6px 0; }
+
+.bar-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text3);
+}
+
+/* EXPORT */
+.export-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s ease 0.15s both;
+}
+
+.export-info h3 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.export-info p  { font-size: 12px; color: var(--text3); }
+
+.export-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* CONTROLS */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.5s ease 0.2s both;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 180px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 16px;
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-box:focus {
+  border-color: rgba(56,189,248,0.4);
+  box-shadow: 0 0 0 3px rgba(56,189,248,0.05);
+}
+
+.search-box::placeholder { color: var(--text3); }
+
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.filter-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-family: 'Sora', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover { border-color: rgba(56,189,248,0.3); color: var(--text); }
+.f-all  { border-color: rgba(56,189,248,0.5); color: var(--accent); background: rgba(56,189,248,0.07); }
+.f-dpo  { border-color: rgba(129,140,248,0.5); color: var(--accent2); background: rgba(129,140,248,0.07); }
+.f-E    { border-color: rgba(52,211,153,0.5); color: var(--accent3); background: rgba(52,211,153,0.07); }
+.f-N    { border-color: rgba(251,191,36,0.5); color: var(--warn); background: rgba(251,191,36,0.07); }
+.f-C    { border-color: rgba(248,113,113,0.5); color: var(--danger); background: rgba(248,113,113,0.07); }
+
+.result-count {
+  font-size: 12px;
+  color: var(--text3);
+  margin-bottom: 14px;
+}
+
+.result-count strong { color: var(--text2); }
+
+/* PREF CARD */
+.pref-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: border-color 0.2s;
+  animation: fadeUp 0.35s ease both;
+}
+
+.pref-card:hover { border-color: rgba(56,189,248,0.2); }
+
+.pref-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  background: rgba(255,255,255,0.01);
+}
+
+.pref-question {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  line-height: 1.5;
+}
+
+.pref-badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.enc-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.enc-E    { background: rgba(52,211,153,0.1); color: var(--accent3); border: 1px solid rgba(52,211,153,0.25); }
+.enc-N    { background: rgba(251,191,36,0.1); color: var(--warn);    border: 1px solid rgba(251,191,36,0.25); }
+.enc-C    { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+.enc-none { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.enc-dpo  { background: rgba(129,140,248,0.1); color: var(--accent2); border: 1px solid rgba(129,140,248,0.25); }
+
+.pref-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pref-col {
+  padding: 16px 20px;
+}
+
+.pref-col:first-child { border-right: 1px solid var(--border); }
+
+.pref-col-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.col-chosen   { color: var(--accent3); }
+.col-rejected { color: var(--danger); }
+.col-empty    { color: var(--text3); }
+
+.pref-answer-text {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+.entropy-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  background: rgba(56,189,248,0.07);
+  color: var(--accent);
+  border: 1px solid rgba(56,189,248,0.15);
+}
+
+.no-result {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text3);
+  font-size: 14px;
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .pref-body { grid-template-columns: 1fr; }
+  .pref-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<nav class="navbar">
+  <a href="home.html" class="navbar-brand">
+    <div class="dot"></div>
+    MedQA
+  </a>
+  <div class="navbar-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">QA System</a>
+    <a href="dataset.html">Dataset</a>
+    <a href="preferences.html" class="active">Preferences</a>
+  </div>
+</nav>
+
+<div class="page">
+<div class="table-layout">
+
+  <div class="table-header" style="margin-bottom:26px;">
+    <div>
+      <h1>Preference Data</h1>
+      <p style="color:var(--text2);font-size:14px;margin-top:4px;">
+        Rekap evaluasi pakar — pairwise DPO &amp; klasifikasi Entailment / Neutral / Contradiction.
+      </p>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading-state" style="text-align:center;padding:60px 0;">
+    <div class="loader" style="justify-content:center;"><span></span><span></span><span></span></div>
+    <p style="color:var(--text3);font-size:13px;margin-top:12px;">Memuat data evaluasi pakar...</p>
+  </div>
+
+  <div id="main-content" style="display:none;">
+
+    <!-- STATS -->
+    <div class="stats-row" id="stat-tiles"></div>
+
+    <!-- ENC BAR -->
+    <div class="enc-bar-section">
+      <div class="enc-bar-header">
+        <h3>Distribusi Evaluasi ENC</h3>
+        <div class="enc-legend">
+          <span class="leg-e">E · Entailment</span>
+          <span class="leg-n">N · Neutral</span>
+          <span class="leg-c">C · Contradiction</span>
+        </div>
+      </div>
+      <div class="bar-track">
+        <div class="bar-seg bar-e" id="bar-e" style="flex:0"></div>
+        <div class="bar-seg bar-n" id="bar-n" style="flex:0"></div>
+        <div class="bar-seg bar-c" id="bar-c" style="flex:0"></div>
+      </div>
+      <div class="bar-labels">
+        <span id="bar-e-pct">E: 0%</span>
+        <span id="bar-n-pct">N: 0%</span>
+        <span id="bar-c-pct">C: 0%</span>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="export-section">
+      <div class="export-info">
+        <h3>📦 Export Dataset</h3>
+        <p>Unduh data evaluasi dalam format yang siap untuk training DPO.</p>
+      </div>
+      <div class="export-actions">
+        <a href="http://127.0.0.1:8000/download_preferences_excel" class="btn btn-outline" target="_blank">⬇ Excel</a>
+        <a href="http://127.0.0.1:8000/export_dpo" class="btn btn-outline" target="_blank">⬇ DPO JSON</a>
+        <a href="http://127.0.0.1:8000/export_dpo_file" class="btn btn-outline" target="_blank">⬇ DPO JSONL</a>
+      </div>
+    </div>
+
+    <!-- FILTER + SEARCH -->
+    <div class="controls-row">
+      <input
+        type="text"
+        class="search-box"
+        id="search-input"
+        placeholder="🔍  Cari pertanyaan..."
+        oninput="applyFilters()"
+      >
+      <div class="filter-group">
+        <button class="filter-btn f-all" onclick="setFilter('all',this)">Semua</button>
+        <button class="filter-btn" onclick="setFilter('dpo',this)">✦ DPO</button>
+        <button class="filter-btn" onclick="setFilter('E',this)">E · Entailment</button>
+        <button class="filter-btn" onclick="setFilter('N',this)">N · Neutral</button>
+        <button class="filter-btn" onclick="setFilter('C',this)">C · Contradiction</button>
+      </div>
+    </div>
+
+    <div class="result-count" id="result-count"></div>
+
+    <!-- CARDS -->
+    <div id="pref-list"></div>
+    <div class="no-result" id="no-result">
+      <div style="font-size:36px;margin-bottom:10px;">🔍</div>
+      Tidak ada data yang cocok dengan filter ini.
+    </div>
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-icon">🗂️</div>
+      <p>Belum ada data evaluasi.<br>Mulai evaluasi di halaman Dataset.</p>
+      <a href="dataset.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex;">Ke Dataset →</a>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+let allCards  = []
+let activeFilter = 'all'
+
+function truncate(str, n) {
+  return str && str.length > n ? str.slice(0, n) + '…' : (str || '')
+}
+
+function encTagHTML(label) {
+  const map = { E: 'Entailment', N: 'Neutral', C: 'Contradiction' }
+  if (!label || !map[label]) return `<span class="enc-tag enc-none">— belum dievaluasi</span>`
+  return `<span class="enc-tag enc-${label}">${label} · ${map[label]}</span>`
+}
+
+function setFilter(f, btn) {
+  activeFilter = f
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.className = 'filter-btn'
+  })
+  const cls = { all:'f-all', dpo:'f-dpo', E:'f-E', N:'f-N', C:'f-C' }
+  btn.classList.add(cls[f] || 'f-all')
+  applyFilters()
+}
+
+function applyFilters() {
+  const query = document.getElementById('search-input').value.trim().toLowerCase()
+  let visible = 0
+
+  allCards.forEach(({ el, question, enc, hasDPO }) => {
+    const matchSearch = !query || question.toLowerCase().includes(query)
+    let matchFilter = true
+
+    if      (activeFilter === 'E')   matchFilter = enc === 'E'
+    else if (activeFilter === 'N')   matchFilter = enc === 'N'
+    else if (activeFilter === 'C')   matchFilter = enc === 'C'
+    else if (activeFilter === 'dpo') matchFilter = hasDPO
+
+    const show = matchSearch && matchFilter
+    el.style.display = show ? '' : 'none'
+    if (show) visible++
+  })
+
+  document.getElementById('result-count').innerHTML =
+    `Menampilkan <strong>${visible}</strong> dari <strong>${allCards.length}</strong> pertanyaan`
+
+  document.getElementById('no-result').style.display =
+    (visible === 0 && allCards.length > 0) ? 'block' : 'none'
+}
+
+async function loadAll() {
+  try {
+    const [prefRes, statsRes] = await Promise.all([
+      fetch("http://127.0.0.1:8000/preferences"),
+      fetch("http://127.0.0.1:8000/evaluation_stats")
+    ])
+
+    const prefs = await prefRes.json()
+    const stats = await statsRes.json()
+
+    document.getElementById('loading-state').style.display = 'none'
+    document.getElementById('main-content').style.display  = 'block'
+
+    // ── STAT TILES ──
+    const dpoCount = Math.min(
+      prefs.filter(p => p.label === 'chosen').length,
+      prefs.filter(p => p.label === 'rejected').length
+    )
+
+    document.getElementById('stat-tiles').innerHTML = `
+      <div class="stat-tile tile-total" style="animation-delay:0s">
+        <div class="tile-label">Total Entri</div>
+        <div class="tile-value">${stats.total}</div>
+        <div class="tile-sub">semua preferensi</div>
+      </div>
+      <div class="stat-tile tile-dpo" style="animation-delay:.05s">
+        <div class="tile-label">Pasangan DPO</div>
+        <div class="tile-value">${dpoCount}</div>
+        <div class="tile-sub">siap training</div>
+      </div>
+      <div class="stat-tile tile-e" style="animation-delay:.1s">
+        <div class="tile-label">E · Entailment</div>
+        <div class="tile-value">${stats.E}</div>
+        <div class="tile-sub">model benar</div>
+      </div>
+      <div class="stat-tile tile-n" style="animation-delay:.15s">
+        <div class="tile-label">N · Neutral</div>
+        <div class="tile-value">${stats.N}</div>
+        <div class="tile-sub">ambigu</div>
+      </div>
+      <div class="stat-tile tile-c" style="animation-delay:.2s">
+        <div class="tile-label">C · Contradiction</div>
+        <div class="tile-value">${stats.C}</div>
+        <div class="tile-sub">halusinasi</div>
+      </div>
+    `
+
+    // ── ENC BAR ──
+    const encTotal = (stats.E || 0) + (stats.N || 0) + (stats.C || 0)
+
+    if (encTotal > 0) {
+      const pE = Math.round((stats.E / encTotal) * 100)
+      const pN = Math.round((stats.N / encTotal) * 100)
+      const pC = 100 - pE - pN
+
+      // animate after paint
+      requestAnimationFrame(() => {
+        document.getElementById('bar-e').style.flex = stats.E || 0.01
+        document.getElementById('bar-n').style.flex = stats.N || 0.01
+        document.getElementById('bar-c').style.flex = stats.C || 0.01
+
+        document.getElementById('bar-e').innerText = stats.E > 0 ? `E ${pE}%` : ''
+        document.getElementById('bar-n').innerText = stats.N > 0 ? `N ${pN}%` : ''
+        document.getElementById('bar-c').innerText = stats.C > 0 ? `C ${pC}%` : ''
+
+        document.getElementById('bar-e-pct').innerText = `E: ${pE}%`
+        document.getElementById('bar-n-pct').innerText = `N: ${pN}%`
+        document.getElementById('bar-c-pct').innerText = `C: ${pC}%`
+      })
+    } else {
+      ['bar-e','bar-n','bar-c'].forEach(id => {
+        document.getElementById(id).style.flex = 1
+        document.getElementById(id).innerText = ''
+      })
+      document.getElementById('bar-n').innerText = 'Belum ada evaluasi ENC'
+    }
+
+    // ── GROUP BY QUESTION ──
+    const grouped = {}
+
+    prefs.forEach(p => {
+      const key = (p.question || '').trim().toLowerCase()
+      if (!grouped[key]) grouped[key] = {
+        question: p.question,
+        chosen: null, rejected: null,
+        enc: null, entropy: null
+      }
+      if (p.label === 'chosen')                 grouped[key].chosen   = p.answer
+      if (p.label === 'rejected')               grouped[key].rejected = p.answer
+      if (['E','N','C'].includes(p.label)) {
+        grouped[key].enc     = p.label
+        grouped[key].entropy = p.entropy
+      }
+    })
+
+    const questions = Object.values(grouped)
+
+    if (questions.length === 0) {
+      document.getElementById('empty-state').style.display = 'block'
+      document.getElementById('result-count').style.display = 'none'
+      return
+    }
+
+    const container = document.getElementById('pref-list')
+
+    questions.forEach((item, idx) => {
+      const hasDPO = !!(item.chosen && item.rejected)
+      const enc    = item.enc
+
+      const el = document.createElement('div')
+      el.className = 'pref-card'
+      el.style.animationDelay = Math.min(idx * 0.035, 0.4) + 's'
+
+      const chosenText   = item.chosen   || '<em style="color:var(--text3)">Belum dipilih</em>'
+      const rejectedText = item.rejected || '<em style="color:var(--text3)">Belum dipilih</em>'
+
+      el.innerHTML = `
+        <div class="pref-card-header">
+          <div class="pref-question">${item.question}</div>
+          <div class="pref-badges">
+            ${item.entropy != null && item.entropy > 0
+              ? `<span class="entropy-pill">${item.entropy}</span>` : ''}
+            ${hasDPO
+              ? `<span class="enc-tag enc-dpo">✦ DPO</span>` : ''}
+            ${encTagHTML(enc)}
+          </div>
+        </div>
+        <div class="pref-body">
+          <div class="pref-col">
+            <div class="pref-col-label ${hasDPO ? 'col-chosen' : 'col-empty'}">
+              ${hasDPO ? '✓ Chosen' : '○ Chosen — belum dipilih'}
+            </div>
+            <div class="pref-answer-text">${chosenText}</div>
+          </div>
+          <div class="pref-col">
+            <div class="pref-col-label ${hasDPO ? 'col-rejected' : 'col-empty'}">
+              ${hasDPO ? '✗ Rejected' : '○ Rejected — belum dipilih'}
+            </div>
+            <div class="pref-answer-text">${rejectedText}</div>
+          </div>
+        </div>
+      `
+
+      container.appendChild(el)
+      allCards.push({ el, question: item.question, enc, hasDPO })
+    })
+
+    applyFilters()
+
+  } catch (e) {
+    document.getElementById('loading-state').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p>Gagal memuat data.<br>Pastikan server backend berjalan di port 8000.</p>
+      </div>
+    `
+  }
+}
+
+loadAll()
+</script>
+
+</body>
+</html>

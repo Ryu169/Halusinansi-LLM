@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical QA System — Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="home.html" class="navbar-brand">
+    <div class="dot"></div>
+    MedQA
+  </a>
+  <div class="navbar-links">
+    <a href="home.html" class="active">Home</a>
+    <a href="index.html">QA System</a>
+    <a href="dataset.html">Dataset</a>
+    <a href="preferences.html">Preferences</a>
+    <a href="evaluation.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+
+    <div class="hero-badge">
+      <span>🧬</span>
+      Medical AI Research System
+    </div>
+
+    <h1>
+      Evaluasi Halusinasi LLM<br>
+      pada <span class="highlight">Pertanyaan Medis</span>
+    </h1>
+
+    <p class="hero-sub">
+      Sistem berbasis <strong style="color:var(--text)">Large Language Model</strong> yang mendeteksi 
+      ketidakpastian jawaban secara otomatis menggunakan <strong style="color:var(--text)">Entropy Score</strong>, 
+      dilengkapi Human-in-the-Loop dan Direct Preference Optimization (DPO).
+    </p>
+
+    <div class="hero-actions">
+      <a href="index.html" class="btn btn-primary">
+        ⚡ Mulai Tanya Jawab
+      </a>
+      <a href="dataset.html" class="btn btn-outline">
+        📊 Lihat Dataset
+      </a>
+    </div>
+
+  </section>
+
+  <!-- STATS -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon">🤖</div>
+      <div class="stat-label">Base Model</div>
+      <div class="stat-value">DEEPSEEK 8B</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-label">Fine-tuning</div>
+      <div class="stat-value">DPO</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📐</div>
+      <div class="stat-label">Metrik Utama</div>
+      <div class="stat-value">Entropy Score</div>
+    </div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="section-grid" style="margin-top:40px;">
+
+    <div class="card" style="animation: fadeUp 0.6s ease 0.5s both;">
+      <h3>🔄 Alur Sistem</h3>
+      <ol>
+        <li>User memasukkan pertanyaan medis</li>
+        <li>Model menghasilkan 3 jawaban (A, B, C)</li>
+        <li>Sistem menghitung Entropy Score</li>
+        <li>Risk level ditentukan otomatis</li>
+        <li>User memilih jawaban terbaik</li>
+        <li>Data tersimpan untuk training DPO</li>
+      </ol>
+    </div>
+
+    <div class="card" style="animation: fadeUp 0.6s ease 0.6s both;">
+      <h3>🛡️ Fitur Utama</h3>
+      <ul>
+        <li>Multi-response generation (A, B, C)</li>
+        <li>Entropy untuk deteksi ketidakpastian</li>
+        <li>Risk classification otomatis</li>
+        <li>Pairwise human evaluation</li>
+        <li>Direct Preference Optimization</li>
+        <li>Dataset export (.jsonl / Excel)</li>
+      </ul>
+    </div>
+
+    <div class="card" style="animation: fadeUp 0.6s ease 0.7s both;">
+      <h3>📊 Risk Level</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="risk-badge risk-low">🟢 Low Risk</span>
+          <span style="font-size:13px;color:var(--text2)">Entropy &lt; 1.5 — Jawaban cukup yakin</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="risk-badge risk-medium">🟠 Medium</span>
+          <span style="font-size:13px;color:var(--text2)">Entropy 1.5–2.5 — Perlu verifikasi</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span class="risk-badge risk-high">🔴 High Risk</span>
+          <span style="font-size:13px;color:var(--text2)">Entropy &gt; 2.5 — Potensi halusinasi</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="animation: fadeUp 0.6s ease 0.8s both;">
+      <h3>🔬 Tentang DPO</h3>
+      <p style="font-size:14px;color:var(--text2);line-height:1.8;">
+        <strong style="color:var(--text)">Direct Preference Optimization</strong> memungkinkan model 
+        belajar dari preferensi manusia tanpa reward model terpisah. 
+        Setiap pilihan jawaban menjadi sinyal pelatihan untuk meningkatkan 
+        akurasi jawaban medis ke depannya.
+      </p>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;padding:60px 0 40px;position:relative;z-index:1;">
+    <p style="color:var(--text3);font-size:13px;">
+      Medical QA System · Powered by DEEPSEEK 8B + DPO · 2026
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>

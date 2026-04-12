@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA System — Medical QA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<nav class="navbar">
+  <a href="home.html" class="navbar-brand">
+    <div class="dot"></div>
+    MedQA
+  </a>
+  <div class="navbar-links">
+    <a href="home.html">Home</a>
+    <a href="index.html" class="active">QA System</a>
+    <a href="dataset.html">Dataset</a>
+    <a href="preferences.html">Preferences</a>
+  </div>
+</nav>
+
+<div class="page">
+<div class="qa-layout">
+
+  <div class="qa-header">
+    <h1>QA System</h1>
+    <p>Masukkan pertanyaan medis — sistem akan mengevaluasi jawaban dan tingkat risiko halusinasi.</p>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-group">
+    <input
+      type="text"
+      id="question"
+      placeholder="Contoh: Apa gejala umum diabetes tipe 2?"
+      onkeydown="if(event.key==='Enter') askQuestion()"
+    >
+    <button class="btn btn-primary" onclick="askQuestion()" id="ask-btn">
+      Generate
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading" style="display:none; text-align:center; padding:30px 0;">
+    <div class="loader" style="justify-content:center;">
+      <span></span><span></span><span></span>
+    </div>
+    <p style="color:var(--text3);font-size:13px;margin-top:10px;">Generating jawaban...</p>
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div id="result-section" style="display:none;">
+
+    <div class="result-panel fade-in">
+      <div class="result-row">
+        <div class="result-label">Jawaban</div>
+        <div class="result-value" id="answer">—</div>
+      </div>
+      <div class="result-row">
+        <div class="result-label">Entropy</div>
+        <div class="result-value">
+          <span class="entropy-display" id="entropy">—</span>
+        </div>
+      </div>
+      <div class="result-row">
+        <div class="result-label">Risk Level</div>
+        <div class="result-value">
+          <span id="risk">—</span>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+</div>
+</div>
+
+<script>
+let isLoading = false
+
+async function askQuestion(){
+  if (isLoading) return
+  isLoading = true
+
+  const question = document.getElementById("question").value.trim()
+  if (!question) { isLoading = false; return }
+
+  document.getElementById("loading").style.display = "block"
+  document.getElementById("result-section").style.display = "none"
+  document.getElementById("ask-btn").disabled = true
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    })
+
+    const data = await response.json()
+
+    // 🔥 kalau backend kirim error
+    if (data.error) {
+
+      document.getElementById("answer").innerText = "⚠️ " + data.error
+      document.getElementById("entropy").innerText = "-"
+      document.getElementById("risk").innerText = "-"
+
+    } else {
+
+      // ✅ tampilkan jawaban model
+      document.getElementById("answer").innerHTML =
+        (data.model_answer || "-").replace(/\n/g, "<br>")
+
+      // ✅ tampilkan entropy
+      const entropyValue = data.entropy
+      document.getElementById("entropy").innerText = entropyValue
+
+      // ✅ tampilkan risk
+      let riskHTML = ""
+
+      if (entropyValue < 1.5) {
+        riskHTML = `<span class="risk-badge risk-low">🟢 Low Risk</span>`
+      } else if (entropyValue < 2.5) {
+        riskHTML = `<span class="risk-badge risk-medium">🟠 Medium Risk</span>`
+      } else {
+        riskHTML = `<span class="risk-badge risk-high">🔴 High Risk</span>`
+      }
+
+      document.getElementById("risk").innerHTML = riskHTML
+    }
+
+    document.getElementById("loading").style.display = "none"
+    document.getElementById("result-section").style.display = "block"
+
+    document.getElementById("loading").style.display = "none"
+    document.getElementById("result-section").style.display = "block"
+
+  } catch (e) {
+    document.getElementById("loading").style.display = "none"
+    document.getElementById("result-section").style.display = "block"
+    document.getElementById("answer").innerText = "⚠️ Gagal terhubung ke server. Pastikan backend berjalan di port 8000."
+  }
+
+  document.getElementById("ask-btn").disabled = false
+  isLoading = false
+}
+
+function escapeTemplate(str) {
+  return (str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+</script>
+
+</body>
+</html>

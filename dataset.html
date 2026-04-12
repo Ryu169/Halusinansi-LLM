@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dataset — Medical QA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<nav class="navbar">
+  <a href="home.html" class="navbar-brand">
+    <div class="dot"></div>
+    MedQA
+  </a>
+  <div class="navbar-links">
+    <a href="home.html">Home</a>
+    <a href="index.html">QA System</a>
+    <a href="dataset.html" class="active">Dataset</a>
+    <a href="preferences.html">Preferences</a>
+  </div>
+</nav>
+
+<div class="page">
+<div class="table-layout">
+
+  <div class="table-header">
+    <div>
+      <h1>Dataset QA</h1>
+      <p style="color:var(--text2);font-size:14px;margin-top:4px;">
+        Semua pertanyaan & jawaban yang telah digenerate beserta entropy score-nya.
+      </p>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <a href="http://127.0.0.1:8000/download_qa_excel" class="btn btn-outline" target="_blank">
+        ⬇ Excel
+      </a>
+      <a href="http://127.0.0.1:8000/dataset" class="btn btn-outline" target="_blank">
+        ⬇ JSON
+      </a>
+    </div>
+  </div>
+
+  <!-- SUMMARY STRIP -->
+  <div style="display:flex;gap:14px;margin-bottom:24px;" id="summary-strip"></div>
+
+  <!-- TABLE -->
+  <div id="loading-state" style="text-align:center;padding:50px 0;">
+    <div class="loader" style="justify-content:center;"><span></span><span></span><span></span></div>
+    <p style="color:var(--text3);font-size:13px;margin-top:10px;">Memuat data...</p>
+  </div>
+
+  <div id="table-wrap" style="display:none;">
+
+    <div id="dataset-list"></div>
+  
+    <div id="empty-state" class="empty-state" style="display:none;">
+      <div class="empty-icon">📭</div>
+      <p>Belum ada data. Mulai dengan mengajukan pertanyaan di QA System.</p>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+
+fetch("http://127.0.0.1:8000/preferences")
+  .then(res => res.json())
+  .then(preferences => {
+
+    fetch("http://127.0.0.1:8000/dataset")
+      .then(res => res.json())
+      .then(data => {
+
+        const container = document.getElementById("dataset-list")
+
+        if (data.length === 0) {
+          document.getElementById("empty-state").style.display = "block"
+          return
+        }
+
+        data.forEach((d) => {
+
+          const card = document.createElement("div")
+
+          card.innerHTML = `
+          <div class="card fade-in" style="margin-bottom:20px;">
+
+            <div style="font-weight:600;margin-bottom:12px;">
+              ${d.question}
+            </div>
+
+            <div class="pair-grid">
+
+              <div class="pair-card">
+                <div class="pair-label">Model</div>
+                <div class="pair-text">${d.model_answer}</div>
+                <button class="btn btn-primary choose-model">Pilih Model</button>
+              </div>
+
+              <div class="pair-card">
+                <div class="pair-label">Dataset</div>
+                <div class="pair-text">${d.dataset_answer}</div>
+                <button class="btn btn-primary choose-dataset">Pilih Dataset</button>
+              </div>
+
+            </div>
+
+            <div style="margin-top:14px;">
+              <button class="btn btn-outline btn-e">E</button>
+              <button class="btn btn-outline btn-n">N</button>
+              <button class="btn btn-outline btn-c">C</button>
+            </div>
+
+          </div>
+          `
+
+          // ===== DATA =====
+          card.dataset.question = d.question
+          card.dataset.model = d.model_answer
+          card.dataset.dataset = d.dataset_answer
+
+          // ===== BUTTON =====
+          const btnModel = card.querySelector(".choose-model")
+          const btnDataset = card.querySelector(".choose-dataset")
+          const btnE = card.querySelector(".btn-e")
+          const btnN = card.querySelector(".btn-n")
+          const btnC = card.querySelector(".btn-c")
+
+          // =====================
+          // 🔥 RESTORE STATE
+          // =====================
+          const prefMatch = preferences.filter(p =>
+            p.question?.trim().toLowerCase() === d.question?.trim().toLowerCase()
+          )
+
+          // ===== DPO (chosen) =====
+          const chosenPref = prefMatch.find(p => p.label === "chosen")
+
+          if (chosenPref) {
+
+            if (chosenPref.answer?.trim() === d.model_answer?.trim()) {
+              btnModel.innerText = "✅ Dipilih"
+              btnModel.disabled = true
+              btnDataset.disabled = true
+            }
+
+            if (chosenPref.answer?.trim() === d.dataset_answer?.trim()) {
+              btnDataset.innerText = "✅ Dipilih"
+              btnDataset.disabled = true
+              btnModel.disabled = true
+            }
+          }
+
+          // ===== ENC =====
+          const encPref = prefMatch.find(p => ["E","N","C"].includes(p.label))
+
+          if (encPref) {
+
+            if (encPref.label === "E") {
+              btnE.classList.add("active-e")
+              btnE.innerText = "✅ E"
+            }
+
+            if (encPref.label === "N") {
+              btnN.classList.add("active-n")
+              btnN.innerText = "✅ N"
+            }
+
+            if (encPref.label === "C") {
+              btnC.classList.add("active-c")
+              btnC.innerText = "✅ C"
+            }
+
+            btnE.disabled = true
+            btnN.disabled = true
+            btnC.disabled = true
+          }
+
+          // =====================
+          // 🔵 DPO CLICK
+          // =====================
+          btnModel.addEventListener("click", () => {
+            chooseAnswer(d.question, d.model_answer, d.dataset_answer)
+            btnModel.innerText = "✅ Dipilih"
+            btnModel.disabled = true
+            btnDataset.disabled = true
+          })
+
+          btnDataset.addEventListener("click", () => {
+            chooseAnswer(d.question, d.dataset_answer, d.model_answer)
+            btnDataset.innerText = "✅ Dipilih"
+            btnDataset.disabled = true
+            btnModel.disabled = true
+          })
+
+          // =====================
+          // 🟢 ENC CLICK
+          // =====================
+          function selectENC(label, btnClicked) {
+
+            fetch("http://127.0.0.1:8000/evaluate", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                question: d.question,
+                answer: d.model_answer,
+                entropy: d.entropy,
+                label: label
+              })
+            })
+            .then(res => res.json())
+            .then(() => {
+
+              // 🔥 RESET WARNA (INI YANG KAMU TANYAKAN)
+              btnE.classList.remove("active-e")
+              btnN.classList.remove("active-n")
+              btnC.classList.remove("active-c")
+
+              // 🔥 SET WARNA BARU
+              if (label === "E") btnClicked.classList.add("active-e")
+              if (label === "N") btnClicked.classList.add("active-n")
+              if (label === "C") btnClicked.classList.add("active-c")
+
+              // 🔥 UPDATE TEXT
+              btnClicked.innerText = "✅ " + label
+            })
+          }
+
+          btnE.addEventListener("click", () => selectENC("E", btnE))
+          btnN.addEventListener("click", () => selectENC("N", btnN))
+          btnC.addEventListener("click", () => selectENC("C", btnC))
+
+          container.appendChild(card)
+
+        })
+
+        document.getElementById("loading-state").style.display = "none"
+        document.getElementById("table-wrap").style.display = "block"
+
+      })
+
+  })
+
+function chooseAnswer(question, chosen, rejected) {
+
+  fetch("http://127.0.0.1:8000/save_preference_pair", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      question: question,
+      chosen: chosen,
+      rejected: rejected
+    })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("✅ Pilihan berhasil disimpan")
+  })
+}
+
+</script>
+
+</body>
+</html>
